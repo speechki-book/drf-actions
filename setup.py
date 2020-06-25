@@ -15,7 +15,7 @@ classifiers = [
     "Programming Language :: Python :: 3.8",
 ]
 setup(
-    name="drf-permission-rules",
+    name="drf_actions",
     version="0.1.0",
     description="Declarative access policies/permissions modeled after AWS' IAM policies.",
     author="Pavel Maltsev",
