@@ -119,8 +119,8 @@ class ActionContentType(TimeStampedModel):
         prefix = self.trigger_prefix()
         build_json = []
         for field in DRF_ACTIONS_SETTINGS["content_types"][self.content_type]["fields"]:
-            build_json.append(f"'{field}'")
-            build_json.append(f"NEW.{field}")
+            build_json.append(f"'{field[0]}'")
+            build_json.append(f"NEW.{field[1]}")
 
         m2to_variables, m2m_calc, m2m_values = self.m2m_init()
         owner = self.owner()
