@@ -32,8 +32,9 @@ class ActionContentType(TimeStampedModel):
         current_objects = set(EventJournal.objects.filter(content_type=content_type).values_list("pk", flat=True))
         queryset = set(model.objects.all().values_list("pk", flat=True))
         obj_ids = queryset.difference(current_objects)
+        fields = [item[1] for item in DRF_ACTIONS_SETTINGS["content_types"][content_type]["fields"]]
         objs = model.objects.filter(pk__in=obj_ids)\
-            .values("pk", *DRF_ACTIONS_SETTINGS["content_types"][content_type]["fields"])
+            .values("pk", *fields)
 
         new_objs = (
             EventJournal(
