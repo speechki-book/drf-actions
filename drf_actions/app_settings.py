@@ -9,8 +9,17 @@ else:
         "content_types": {
             "user": {
                 "pk": "id",
+                "owner": None,
+                "m2m": [
+                    ("users_user_groups", "group_id", "auth_group", "id", "name", "groups")
+                ],
                 "models": ("users", "user"),
-                "fields": ("email", "photo", "partner_id", "full_name", "full_name",),
+                "fields": (
+                    ("email", "email"),
+                    ("photo", "photo"),
+                    ("partner", "partner_id"),
+                    ("full_name", "full_name",)
+                ),
             }
         },
         "create_event_for_new_entity": True,

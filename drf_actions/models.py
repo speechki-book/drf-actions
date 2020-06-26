@@ -89,6 +89,32 @@ class ActionContentType(TimeStampedModel):
             cursor.execute(query)
             cursor.execute(func)
 
+    def m2m_init(self):
+        m2m = DRF_ACTIONS_SETTINGS["content_types"][self.content_type].get("m2m")
+
+        if not m2m:
+            return "", "", []
+
+        m2m_init_variables = []
+        m2m_calc_variables = []
+        m2m_values = []
+        for item in m2m:
+            m2m_init_variables.append(f"{item[5]} json;")
+            m2m_calc_variables.append(
+                f"{item[5]}:= json_agg(tmp.{item[4]})::jsonb from (select name from {item[0]} left join {item[2]} ag on {item[0]}.{item[1]} = ag.{item[3]}) as tmp;"
+            )
+            m2m_values.append(f"'{item[5]}',{item[5]}")
+
+        return "\n".join(m2m_init_variables), "\n".join(m2m_calc_variables), m2m_values
+
+    def owner(self):
+        owner = DRF_ACTIONS_SETTINGS["content_types"][self.content_type].get("owner")
+
+        if not owner:
+            return []
+
+        return ["owner", f"NEW.{owner}"]
+
     def create_trigger_function(self):
         prefix = self.trigger_prefix()
         build_json = []
@@ -96,7 +122,10 @@ class ActionContentType(TimeStampedModel):
             build_json.append(f"'{field}'")
             build_json.append(f"NEW.{field}")
 
-        build_json_str = ",".join(build_json)
+        m2to_variables, m2m_calc, m2m_values = self.m2m_init()
+        owner = self.owner()
+
+        build_json_str = ",".join(build_json + m2m_values + owner)
         pk = DRF_ACTIONS_SETTINGS["content_types"][self.content_type]["pk"]
 
         func = f"""CREATE OR REPLACE FUNCTION public.{prefix}{self.content_type}_func() RETURNS TRIGGER AS
@@ -104,8 +133,10 @@ class ActionContentType(TimeStampedModel):
                 declare
                     json_new jsonb;
                     reason varchar;
+                    {m2to_variables}
                 BEGIN
                     json_new:= json_build_object({build_json_str});
+                    {m2m_calc}
                     INSERT INTO {EventJournal._meta.db_table}(reason, object_id, content_type, data, created, modified)
                         VALUES (tg_op ,NEW.{pk}, '{self.content_type}', json_new, now(), now());
                         RETURN null; 
