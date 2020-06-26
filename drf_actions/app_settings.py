@@ -13,7 +13,7 @@ else:
                 "m2m": [
                     ("users_user_groups", "group_id", "auth_group", "id", "name", "groups")
                 ],
-                "models": ("users", "user"),
+                "model": ("users", "user"),
                 "fields": (
                     ("email", "email"),
                     ("photo", "photo"),
