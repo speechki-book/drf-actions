@@ -136,8 +136,8 @@ class ActionContentType(TimeStampedModel):
                     reason varchar;
                     {m2to_variables}
                 BEGIN
-                    json_new:= json_build_object({build_json_str});
                     {m2m_calc}
+                    json_new:= json_build_object({build_json_str});
                     INSERT INTO {EventJournal._meta.db_table}(reason, object_id, content_type, data, created, modified)
                         VALUES (tg_op ,NEW.{pk}, '{self.content_type}', json_new, now(), now());
                         RETURN null; 
