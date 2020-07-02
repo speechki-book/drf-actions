@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.postgres.fields import JSONField
 from django.apps import apps
 from model_utils.models import TimeStampedModel
-from typing import Type
+from typing import Type, Tuple, List, Dict
 from drf_actions.app_settings import DRF_ACTIONS_SETTINGS, ACTION_EVENTS, ACTION_CONTENT_TYPES, INIT_CONTENT_TYPE
 from itertools import islice
 from django.db import connection
@@ -28,22 +28,44 @@ class ActionContentType(TimeStampedModel):
     table = models.CharField(max_length=100)
 
     @staticmethod
-    def bulk_create_entities(model: Type["models.Model"], content_type: str):
-        current_objects = set(EventJournal.objects.filter(content_type=content_type).values_list("pk", flat=True))
-        queryset = set(model.objects.all().values_list("pk", flat=True))
-        obj_ids = queryset.difference(current_objects)
-        fields = [item[1] for item in DRF_ACTIONS_SETTINGS["content_types"][content_type]["fields"]]
-        objs = model.objects.filter(pk__in=obj_ids)\
-            .values("pk", *fields)
+    def prepare_event_journal(
+            objs,
+            content_type: str,
+            pk: str,
+            fields_dict: Dict[str, str],
+            m2m: List[Tuple[str, str]]
+    ):
+        for obj in objs:
+            data = {}
+            for key, value in fields_dict.items():
+                attr_value = getattr(obj, key).__str__()
+                if isinstance(attr_value, models.FileField):
+                    data[value] = attr_value.url
+                else:
+                    data[value] = attr_value
 
-        new_objs = (
-            EventJournal(
+            for m2m_field, attr_name in m2m:
+                data[m2m_field] = [getattr(item, attr_name) for item in getattr(obj, m2m_field).all()]
+
+            yield EventJournal(
                 reason=ACTION_EVENTS.INSERT,
-                object_id=obj["pk"],
                 content_type=content_type,
-                data=obj
-            ) for obj in objs
-        )
+                object_id=getattr(obj, pk),
+                data=data
+            )
+
+    def bulk_create_entities(self, model: Type["models.Model"], content_type: str):
+        m2m = [(item[6], item[5]) for item in DRF_ACTIONS_SETTINGS["content_types"][content_type]["m2m"]]
+        prefetch = [item[0] for item in m2m]
+        pk = DRF_ACTIONS_SETTINGS["content_types"][content_type]["pk"]
+        fields_dict = {item[1]: item[0] for item in DRF_ACTIONS_SETTINGS["content_types"][content_type]["fields"]}
+        fields_dict[pk] = pk
+        current_objects = set(EventJournal.objects.filter(content_type=content_type).values_list(pk, flat=True))
+        queryset = set(model.objects.all().values_list(pk, flat=True))
+        obj_ids = queryset.difference(current_objects)
+        objs = model.objects.prefetch_related(*prefetch).filter(pk__in=obj_ids)
+
+        new_objs = self.prepare_event_journal(objs, content_type, pk, fields_dict, m2m)
 
         while True:
             batch = list(islice(new_objs, 100))
@@ -100,11 +122,12 @@ class ActionContentType(TimeStampedModel):
         m2m_calc_variables = []
         m2m_values = []
         for item in m2m:
-            m2m_init_variables.append(f"{item[5]} json;")
+            m2m_init_variables.append(f"{item[6]} json;")
             m2m_calc_variables.append(
-                f"{item[5]}:= json_agg(tmp.{item[4]})::jsonb from (select name from {item[0]} left join {item[2]} ag on {item[0]}.{item[1]} = ag.{item[3]}) as tmp;"
+                f"{item[6]}:= json_agg(tmp.{item[5]})::jsonb from (select name from {item[0]} left join {item[3]} ag on"
+                f" {item[0]}.{item[1]} = ag.{item[4]} where {item[0]}.{item[2]} = NEW.id) as tmp;"
             )
-            m2m_values.append(f"'{item[5]}',{item[5]}")
+            m2m_values.append(f"'{item[6]}',{item[6]}")
 
         return "\n".join(m2m_init_variables), "\n".join(m2m_calc_variables), m2m_values
 
