@@ -41,9 +41,9 @@ class ActionContentType(TimeStampedModel):
             data = {}
             for key, value in fields_dict.items():
                 attr_value = getattr(obj, key)
-                if isinstance(attr_value, files.FileField) and attr_value.name:
+                if isinstance(attr_value, files.FieldFile) and attr_value.name:
                     data[value] = attr_value.url
-                elif isinstance(attr_value, files.FileField) and not attr_value.name:
+                elif isinstance(attr_value, files.FieldFile) and not attr_value.name:
                     data[value] = None
                 else:
                     data[value] = attr_value
