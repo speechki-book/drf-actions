@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.fields import files
 from django.contrib.postgres.fields import JSONField
 from django.apps import apps
 from model_utils.models import TimeStampedModel
@@ -40,8 +41,10 @@ class ActionContentType(TimeStampedModel):
             data = {}
             for key, value in fields_dict.items():
                 attr_value = getattr(obj, key)
-                if isinstance(attr_value, models.FileField):
+                if isinstance(attr_value, files.FileField) and attr_value.name:
                     data[value] = attr_value.url
+                elif isinstance(attr_value, files.FileField) and not attr_value.name:
+                    data[value] = None
                 else:
                     data[value] = attr_value
 
