@@ -35,10 +35,11 @@ class ActionContentType(TimeStampedModel):
             fields_dict: Dict[str, str],
             m2m: List[Tuple[str, str]]
     ):
+        owner = DRF_ACTIONS_SETTINGS["content_types"][content_type].get("owner")
         for obj in objs:
             data = {}
             for key, value in fields_dict.items():
-                attr_value = getattr(obj, key).__str__()
+                attr_value = getattr(obj, key)
                 if isinstance(attr_value, models.FileField):
                     data[value] = attr_value.url
                 else:
@@ -46,6 +47,9 @@ class ActionContentType(TimeStampedModel):
 
             for m2m_field, attr_name in m2m:
                 data[m2m_field] = [getattr(item, attr_name) for item in getattr(obj, m2m_field).all()]
+
+            if owner:
+                data["owner"] = getattr(obj, owner)
 
             yield EventJournal(
                 reason=ACTION_EVENTS.INSERT,
