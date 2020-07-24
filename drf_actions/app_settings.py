@@ -11,14 +11,22 @@ else:
                 "pk": "id",
                 "owner": None,
                 "m2m": [
-                    ("users_user_groups", "group_id", "user_id", "auth_group", "id", "name", "groups")
+                    (
+                        "users_user_groups",
+                        "group_id",
+                        "user_id",
+                        "auth_group",
+                        "id",
+                        "name",
+                        "groups",
+                    )
                 ],
                 "model": ("users", "user"),
                 "fields": (
                     ("email", "email"),
                     ("photo", "photo"),
                     ("partner", "partner_id"),
-                    ("full_name", "full_name",)
+                    ("full_name", "full_name",),
                 ),
             }
         },
@@ -28,7 +36,9 @@ else:
     }
 
 
-ACTION_EVENTS = DRF_ACTIONS_SETTINGS.get("events", Choices("INSERT", "UPDATE", "DELETE",))
+ACTION_EVENTS = DRF_ACTIONS_SETTINGS.get(
+    "events", Choices("INSERT", "UPDATE", "DELETE",)
+)
 
 ACTION_CONTENT_TYPES = Choices(*DRF_ACTIONS_SETTINGS["content_types"].keys())
 

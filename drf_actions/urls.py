@@ -7,6 +7,4 @@ router = DefaultRouter()
 router.register(r"events", EventJournalViewSet, basename="event")
 
 
-urlpatterns = [
-    path("actions/", include(router.urls))
-]
+urlpatterns = [path("actions/", include(router.urls))]

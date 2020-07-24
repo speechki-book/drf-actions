@@ -14,5 +14,5 @@ class EventJournalAdmin(admin.ModelAdmin):
     list_display = ["id", "reason", "object_id", "content_type"]
 
     formfield_overrides = {
-        fields.JSONField: {'widget': JSONEditorWidget},
+        fields.JSONField: {"widget": JSONEditorWidget},
     }

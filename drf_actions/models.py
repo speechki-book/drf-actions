@@ -4,7 +4,12 @@ from django.contrib.postgres.fields import JSONField
 from django.apps import apps
 from model_utils.models import TimeStampedModel
 from typing import Type, Tuple, List, Dict
-from drf_actions.app_settings import DRF_ACTIONS_SETTINGS, ACTION_EVENTS, ACTION_CONTENT_TYPES, INIT_CONTENT_TYPE
+from drf_actions.app_settings import (
+    DRF_ACTIONS_SETTINGS,
+    ACTION_EVENTS,
+    ACTION_CONTENT_TYPES,
+    INIT_CONTENT_TYPE,
+)
 from itertools import islice
 from django.db import connection
 
@@ -30,11 +35,11 @@ class ActionContentType(TimeStampedModel):
 
     @staticmethod
     def prepare_event_journal(
-            objs,
-            content_type: str,
-            pk: str,
-            fields_dict: Dict[str, str],
-            m2m: List[Tuple[str, str]]
+        objs,
+        content_type: str,
+        pk: str,
+        fields_dict: Dict[str, str],
+        m2m: List[Tuple[str, str]],
     ):
         owner = DRF_ACTIONS_SETTINGS["content_types"][content_type].get("owner")
         for obj in objs:
@@ -49,7 +54,9 @@ class ActionContentType(TimeStampedModel):
                     data[value] = attr_value
 
             for m2m_field, attr_name in m2m:
-                data[m2m_field] = [getattr(item, attr_name) for item in getattr(obj, m2m_field).all()]
+                data[m2m_field] = [
+                    getattr(item, attr_name) for item in getattr(obj, m2m_field).all()
+                ]
 
             if owner:
                 data["owner"] = getattr(obj, owner)
@@ -58,16 +65,26 @@ class ActionContentType(TimeStampedModel):
                 reason=ACTION_EVENTS.INSERT,
                 content_type=content_type,
                 object_id=getattr(obj, pk),
-                data=data
+                data=data,
             )
 
     def bulk_create_entities(self, model: Type["models.Model"], content_type: str):
-        m2m = [(item[6], item[5]) for item in DRF_ACTIONS_SETTINGS["content_types"][content_type]["m2m"]]
+        m2m = [
+            (item[6], item[5])
+            for item in DRF_ACTIONS_SETTINGS["content_types"][content_type]["m2m"]
+        ]
         prefetch = [item[0] for item in m2m]
         pk = DRF_ACTIONS_SETTINGS["content_types"][content_type]["pk"]
-        fields_dict = {item[1]: item[0] for item in DRF_ACTIONS_SETTINGS["content_types"][content_type]["fields"]}
+        fields_dict = {
+            item[1]: item[0]
+            for item in DRF_ACTIONS_SETTINGS["content_types"][content_type]["fields"]
+        }
         fields_dict[pk] = pk
-        current_objects = set(EventJournal.objects.filter(content_type=content_type).values_list(pk, flat=True))
+        current_objects = set(
+            EventJournal.objects.filter(content_type=content_type).values_list(
+                pk, flat=True
+            )
+        )
         queryset = set(model.objects.all().values_list(pk, flat=True))
         obj_ids = queryset.difference(current_objects)
         objs = model.objects.prefetch_related(*prefetch).filter(pk__in=obj_ids)
@@ -82,8 +99,12 @@ class ActionContentType(TimeStampedModel):
             EventJournal.objects.bulk_create(batch, 100)
 
     def create_current_type_events(self):
-        app_name, model_name = DRF_ACTIONS_SETTINGS["content_types"][self.content_type]["model"]
-        model: Type["models.Model"] = apps.get_model(app_label=app_name, model_name=model_name)
+        app_name, model_name = DRF_ACTIONS_SETTINGS["content_types"][self.content_type][
+            "model"
+        ]
+        model: Type["models.Model"] = apps.get_model(
+            app_label=app_name, model_name=model_name
+        )
         self.bulk_create_entities(model, self.content_type)
 
     @classmethod
@@ -92,7 +113,9 @@ class ActionContentType(TimeStampedModel):
         for key, content_type in DRF_ACTIONS_SETTINGS["content_types"].values():
             if key not in content_types:
                 app_name, model_name = content_type["model"]
-                model: Type["models.Model"] = apps.get_model(app_label=app_name, model_name=model_name)
+                model: Type["models.Model"] = apps.get_model(
+                    app_label=app_name, model_name=model_name
+                )
                 cls.objects.create(content_type=key, table=model._meta.db_table)
 
     @classmethod
@@ -144,7 +167,7 @@ class ActionContentType(TimeStampedModel):
         if not owner:
             return []
 
-        return ["owner", f"NEW.{owner}"]
+        return ["'owner'", f"NEW.{owner}"]
 
     def create_trigger_function(self):
         prefix = self.trigger_prefix()

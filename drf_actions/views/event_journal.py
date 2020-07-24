@@ -7,12 +7,16 @@ from drf_actions.models import EventJournal
 
 class StandardPagination(pagination.PageNumberPagination):
     page_size = 100
-    page_size_query_param = 'page_size'
+    page_size_query_param = "page_size"
     max_page_size = 10000
 
 
 class EventJournalViewSet(viewsets.ReadOnlyModelViewSet):
-    filter_backends = [filters.SearchFilter, DjangoFilterBackend, filters.OrderingFilter]
+    filter_backends = [
+        filters.SearchFilter,
+        DjangoFilterBackend,
+        filters.OrderingFilter,
+    ]
     serializer_class = EventJournalSerializer
     queryset = EventJournal.objects.all().order_by("-created")
     permission_classes = (HasAPIKey,)
@@ -23,4 +27,7 @@ class EventJournalViewSet(viewsets.ReadOnlyModelViewSet):
         "reason": ["exact", "in"],
         "content_type": ["exact", "in"],
     }
-    ordering_fields = ("id", "created",)
+    ordering_fields = (
+        "id",
+        "created",
+    )

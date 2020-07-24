@@ -10,36 +10,105 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='ActionContentType',
+            name="ActionContentType",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, editable=False, verbose_name='created')),
-                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, editable=False, verbose_name='modified')),
-                ('content_type', models.CharField(choices=[('book', 'book'), ('user', 'user')], db_index=True, max_length=50)),
-                ('table', models.CharField(max_length=100)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "created",
+                    model_utils.fields.AutoCreatedField(
+                        default=django.utils.timezone.now,
+                        editable=False,
+                        verbose_name="created",
+                    ),
+                ),
+                (
+                    "modified",
+                    model_utils.fields.AutoLastModifiedField(
+                        default=django.utils.timezone.now,
+                        editable=False,
+                        verbose_name="modified",
+                    ),
+                ),
+                (
+                    "content_type",
+                    models.CharField(
+                        choices=[("book", "book"), ("user", "user")],
+                        db_index=True,
+                        max_length=50,
+                    ),
+                ),
+                ("table", models.CharField(max_length=100)),
             ],
-            options={
-                'abstract': False,
-            },
+            options={"abstract": False,},
         ),
         migrations.CreateModel(
-            name='EventJournal',
+            name="EventJournal",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, editable=False, verbose_name='created')),
-                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, editable=False, verbose_name='modified')),
-                ('reason', models.CharField(choices=[('create', 'create'), ('update', 'update'), ('delete', 'delete')], db_index=True, max_length=30)),
-                ('object_id', models.CharField(db_index=True, max_length=100)),
-                ('content_type', models.CharField(choices=[('book', 'book'), ('user', 'user')], db_index=True, max_length=50)),
-                ('data', django.contrib.postgres.fields.jsonb.JSONField(blank=True, null=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "created",
+                    model_utils.fields.AutoCreatedField(
+                        default=django.utils.timezone.now,
+                        editable=False,
+                        verbose_name="created",
+                    ),
+                ),
+                (
+                    "modified",
+                    model_utils.fields.AutoLastModifiedField(
+                        default=django.utils.timezone.now,
+                        editable=False,
+                        verbose_name="modified",
+                    ),
+                ),
+                (
+                    "reason",
+                    models.CharField(
+                        choices=[
+                            ("create", "create"),
+                            ("update", "update"),
+                            ("delete", "delete"),
+                        ],
+                        db_index=True,
+                        max_length=30,
+                    ),
+                ),
+                ("object_id", models.CharField(db_index=True, max_length=100)),
+                (
+                    "content_type",
+                    models.CharField(
+                        choices=[("book", "book"), ("user", "user")],
+                        db_index=True,
+                        max_length=50,
+                    ),
+                ),
+                (
+                    "data",
+                    django.contrib.postgres.fields.jsonb.JSONField(
+                        blank=True, null=True
+                    ),
+                ),
             ],
-            options={
-                'abstract': False,
-            },
+            options={"abstract": False,},
         ),
     ]

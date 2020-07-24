@@ -45,7 +45,9 @@ def init_on_row_change():
 
 
 def init_trigger():
-    drop_query = f"DROP TRIGGER IF EXISTS send_change_event ON drf_actions_eventjournal;"
+    drop_query = (
+        f"DROP TRIGGER IF EXISTS send_change_event ON drf_actions_eventjournal;"
+    )
     query = """create trigger send_change_event after insert or update or delete on drf_actions_eventjournal 
     for each row execute procedure rabbitmq.on_row_change();"""
     with connection.cursor() as cursor:
@@ -62,7 +64,7 @@ def init_listen_events(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('drf_actions', '0001_initial'),
+        ("drf_actions", "0001_initial"),
     ]
 
     operations = [
