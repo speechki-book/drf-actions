@@ -10,6 +10,7 @@ else:
             "user": {
                 "pk": "id",
                 "owner": None,
+                "catch_update": [],
                 "m2m": [
                     (
                         "users_user_groups",

@@ -172,14 +172,19 @@ class ActionContentType(TimeStampedModel):
     def create_trigger_function(self):
         prefix = self.trigger_prefix()
         build_json = []
+        delete_build_json = []
         for field in DRF_ACTIONS_SETTINGS["content_types"][self.content_type]["fields"]:
             build_json.append(f"'{field[0]}'")
             build_json.append(f"NEW.{field[1]}")
+
+            delete_build_json.append(f"'{field[0]}'")
+            delete_build_json.append(f"OLD.{field[1]}")
 
         m2to_variables, m2m_calc, m2m_values = self.m2m_init()
         owner = self.owner()
 
         build_json_str = ",".join(build_json + m2m_values + owner)
+        delete_build_json_str = ",".join(delete_build_json + owner)
         pk = DRF_ACTIONS_SETTINGS["content_types"][self.content_type]["pk"]
 
         func = f"""CREATE OR REPLACE FUNCTION public.{prefix}{self.content_type}_func() RETURNS TRIGGER AS
@@ -189,10 +194,16 @@ class ActionContentType(TimeStampedModel):
                     reason varchar;
                     {m2to_variables}
                 BEGIN
-                    {m2m_calc}
-                    json_new:= json_build_object({build_json_str});
-                    INSERT INTO {EventJournal._meta.db_table}(reason, object_id, content_type, data, created, modified)
-                        VALUES (tg_op ,NEW.{pk}, '{self.content_type}', json_new, now(), now());
+                    IF tg_op = 'DELETE' THEN
+                        json_new:= json_build_object({delete_build_json_str});
+                        INSERT INTO {EventJournal._meta.db_table}(reason, object_id, content_type, data, created, modified)
+                            VALUES (tg_op ,OLD.{pk}, '{self.content_type}', json_new, now(), now());
+                    ELSE
+                        {m2m_calc}
+                        json_new:= json_build_object({build_json_str});
+                        INSERT INTO {EventJournal._meta.db_table}(reason, object_id, content_type, data, created, modified)
+                            VALUES (tg_op ,NEW.{pk}, '{self.content_type}', json_new, now(), now());
+                    END IF;
                         RETURN null; 
                 END; $BODY$ LANGUAGE plpgsql;"""
 
@@ -201,8 +212,18 @@ class ActionContentType(TimeStampedModel):
 
     def init_triggers(self):
         prefix = self.trigger_prefix()
+
+        catch_update = DRF_ACTIONS_SETTINGS["content_types"][self.content_type].get(
+            "catch_update"
+        )
+
+        if catch_update:
+            catch_fields = " of " + ",".join(catch_update)
+        else:
+            catch_fields = ""
+
         trigger = f"""create trigger {prefix}{self.content_type}_trigger
-                                after insert or update or delete on {self.table}
+                                after insert or update {catch_fields} or delete on {self.table}
                                 for each row execute procedure public.{prefix}{self.content_type}_func();
                             """
 
