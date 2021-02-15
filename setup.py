@@ -16,7 +16,7 @@ classifiers = [
 ]
 setup(
     name="drf_actions",
-    version="0.1.0",
+    version="0.1.1",
     description="Create event log with help triggers and send notify after create event",
     author="Pavel Maltsev",
     author_email="pavel@speechki.org",
@@ -28,10 +28,10 @@ setup(
     classifiers=classifiers,
     long_description_content_type="text/markdown",
     install_requires=[  # I get to this in a second
-        "django>=2.2.13",
-        "djangorestframework>=3.11.0",
-        "django-model-utils==4.0.0",
-        "django-filter>=2.3.0",
+        "django>=3.1.6",
+        "djangorestframework>=3.12.2",
+        "django-model-utils==4.1.1",
+        "django-filter>=2.4.0",
         "celery",
     ],
     include_package_data=True,
