@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.contrib.postgres import fields
+from django.db import models
 from django_json_widget.widgets import JSONEditorWidget
 from drf_actions.models import ActionContentType, EventJournal
 
@@ -14,5 +14,5 @@ class EventJournalAdmin(admin.ModelAdmin):
     list_display = ["id", "reason", "object_id", "content_type"]
 
     formfield_overrides = {
-        fields.JSONField: {"widget": JSONEditorWidget},
+        models.JSONField: {"widget": JSONEditorWidget},
     }
