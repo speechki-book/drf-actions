@@ -11,6 +11,7 @@ from drf_actions.app_settings import (
 )
 from itertools import islice
 from django.db import connection
+from django.contrib.postgres.fields.jsonb import JSONField
 
 
 class EventJournal(TimeStampedModel):
@@ -20,7 +21,7 @@ class EventJournal(TimeStampedModel):
     reason = models.CharField(max_length=30, choices=REASONS, db_index=True)
     object_id = models.CharField(max_length=100, db_index=True)
     content_type = models.CharField(max_length=50, choices=CONTENT_TYPES, db_index=True)
-    data = models.JSONField(blank=True, null=True)
+    data = JSONField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.content_type} : {self.reason} : {self.object_id}"
