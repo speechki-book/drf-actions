@@ -30,7 +30,7 @@ setup(
     install_requires=[  # I get to this in a second
         "django>=2.2.19",
         "djangorestframework>=3.12.2",
-        "django-model-utils==4.1.1",
+        "django-model-utils>=4.0.0",
         "django-filter>=2.4.0",
         "celery",
     ],
