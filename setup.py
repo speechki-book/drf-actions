@@ -29,7 +29,7 @@ setup(
     long_description_content_type="text/markdown",
     install_requires=[  # I get to this in a second
         "django>=2.2.19",
-        "djangorestframework>=3.12.2",
+        "djangorestframework>=3.11.2",
         "django-model-utils>=4.0.0",
         "django-filter>=2.4.0",
         "celery",
