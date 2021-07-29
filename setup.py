@@ -13,10 +13,11 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
 ]
 setup(
     name="drf_actions",
-    version="0.1.1",
+    version="0.2",
     description="Create event log with help triggers and send notify after create event",
     author="Pavel Maltsev",
     author_email="pavel@speechki.org",
@@ -30,7 +31,7 @@ setup(
     install_requires=[  # I get to this in a second
         "django>=3.1.6",
         "djangorestframework>=3.12.2",
-        "django-model-utils==4.1.1",
+        "django-model-utils>=4.1.1",
         "django-filter>=2.4.0",
         "celery",
     ],
