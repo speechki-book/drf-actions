@@ -5,7 +5,7 @@ on:
     tags:
       - '*'
 
-job:
+jobs:
   Build-And-Publish:
     runs-on: ubuntu-latest
     steps:
@@ -13,18 +13,7 @@ job:
         with:
           fetch-depth: 1
       
-      - uses: actions/setup-python@v2
+      - name: Build and publish to pypi
+        uses: JRubics/poetry-publish@v1.10
         with:
-          python-version: 3.7
-      
-      - name: Install poetry
-        run: pip3 install poetry
-
-      - name: Build
-        run: poetry build
-
-      - name: Configure auth
-        run: poetry config pypi-token.pypi ${{ PYPI_TOKEN }}
-
-      - name: Publish
-        run: poetry publish
+          pypi_token: ${{ secrets.PYPI_TOKEN }}
