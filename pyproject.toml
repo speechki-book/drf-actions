@@ -17,7 +17,7 @@ exclude = ["tests*"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
-Django = ">3.1.6"
+Django = ">=3.2.14"
 djangorestframework = ">=3.12.2"
 django-model-utils = ">=4.1.1"
 django-filter = ">=22.1"
