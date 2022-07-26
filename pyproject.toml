@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "drf-actions"
-version = "0.2.1"
+version = "0.3.0"
 description = "Create event log with help triggers and send notify after create event"
 authors = ["Pavel Maltsev <pavel@speechki.org>"]
 readme = "README.md"
@@ -20,7 +20,7 @@ python = "^3.7"
 Django = ">3.1.6"
 djangorestframework = ">=3.12.2"
 django-model-utils = ">=4.1.1"
-django-filter = ">=2.4.0"
+django-filter = ">=22.1"
 
 [tool.poetry.dev-dependencies]
 
