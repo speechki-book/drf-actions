@@ -1,6 +1,7 @@
 from rest_framework import viewsets, pagination, filters
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework_api_key.permissions import HasAPIKey
+from drf_actions.filters.event_journal import EventJournalFilterSet
 from drf_actions.serializers.event_journal import EventJournalSerializer
 from drf_actions.models import EventJournal
 
@@ -21,12 +22,7 @@ class EventJournalViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = EventJournal.objects.all().order_by("-created")
     permission_classes = (HasAPIKey,)
     pagination_class = StandardPagination
-    filter_fields = {
-        "id": ["exact", "in", "lt", "lte", "gt", "gte"],
-        "created": ["range", "lt", "gt", "lte", "gte"],
-        "reason": ["exact", "in"],
-        "content_type": ["exact", "in"],
-    }
+    filterset_class = EventJournalFilterSet
     ordering_fields = (
         "id",
         "created",
