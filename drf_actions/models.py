@@ -1,16 +1,18 @@
-from django.db import models
-from django.db.models.fields import files
-from django.apps import apps
-from model_utils.models import TimeStampedModel
+from itertools import islice
 from typing import Type, Tuple, List, Dict
+
+from django.apps import apps
+from django.db import models, connection
+from django.db.models.fields import files
+
+from model_utils.models import TimeStampedModel
+
 from drf_actions.app_settings import (
     DRF_ACTIONS_SETTINGS,
     ACTION_EVENTS,
     ACTION_CONTENT_TYPES,
     INIT_CONTENT_TYPE,
 )
-from itertools import islice
-from django.db import connection
 
 
 class EventJournal(TimeStampedModel):
@@ -53,9 +55,7 @@ class ActionContentType(TimeStampedModel):
                     data[value] = attr_value
 
             for m2m_field, attr_name in m2m:
-                data[m2m_field] = [
-                    getattr(item, attr_name) for item in getattr(obj, m2m_field).all()
-                ]
+                data[m2m_field] = [getattr(item, attr_name) for item in getattr(obj, m2m_field).all()]
 
             if owner:
                 data["owner"] = getattr(obj, owner)
@@ -68,22 +68,12 @@ class ActionContentType(TimeStampedModel):
             )
 
     def bulk_create_entities(self, model: Type["models.Model"], content_type: str):
-        m2m = [
-            (item[6], item[5])
-            for item in DRF_ACTIONS_SETTINGS["content_types"][content_type]["m2m"]
-        ]
+        m2m = [(item[6], item[5]) for item in DRF_ACTIONS_SETTINGS["content_types"][content_type]["m2m"]]
         prefetch = [item[0] for item in m2m]
         pk = DRF_ACTIONS_SETTINGS["content_types"][content_type]["pk"]
-        fields_dict = {
-            item[1]: item[0]
-            for item in DRF_ACTIONS_SETTINGS["content_types"][content_type]["fields"]
-        }
+        fields_dict = {item[1]: item[0] for item in DRF_ACTIONS_SETTINGS["content_types"][content_type]["fields"]}
         fields_dict[pk] = pk
-        current_objects = set(
-            EventJournal.objects.filter(content_type=content_type).values_list(
-                pk, flat=True
-            )
-        )
+        current_objects = set(EventJournal.objects.filter(content_type=content_type).values_list(pk, flat=True))
         queryset = set(model.objects.all().values_list(pk, flat=True))
         obj_ids = queryset.difference(current_objects)
         objs = model.objects.prefetch_related(*prefetch).filter(pk__in=obj_ids)
@@ -98,12 +88,8 @@ class ActionContentType(TimeStampedModel):
             EventJournal.objects.bulk_create(batch, 100)
 
     def create_current_type_events(self):
-        app_name, model_name = DRF_ACTIONS_SETTINGS["content_types"][self.content_type][
-            "model"
-        ]
-        model: Type["models.Model"] = apps.get_model(
-            app_label=app_name, model_name=model_name
-        )
+        app_name, model_name = DRF_ACTIONS_SETTINGS["content_types"][self.content_type]["model"]
+        model: Type["models.Model"] = apps.get_model(app_label=app_name, model_name=model_name)
         self.bulk_create_entities(model, self.content_type)
 
     @classmethod
@@ -112,9 +98,7 @@ class ActionContentType(TimeStampedModel):
         for key, content_type in DRF_ACTIONS_SETTINGS["content_types"].values():
             if key not in content_types:
                 app_name, model_name = content_type["model"]
-                model: Type["models.Model"] = apps.get_model(
-                    app_label=app_name, model_name=model_name
-                )
+                model: Type["models.Model"] = apps.get_model(app_label=app_name, model_name=model_name)
                 cls.objects.create(content_type=key, table=model._meta.db_table)
 
     @classmethod
@@ -153,8 +137,10 @@ class ActionContentType(TimeStampedModel):
         for item in m2m:
             m2m_init_variables.append(f"{item[6]} json;")
             m2m_calc_variables.append(
-                f"{item[6]}:= json_agg(tmp.{item[5]})::jsonb from (select name from {item[0]} left join {item[3]} ag on"
-                f" {item[0]}.{item[1]} = ag.{item[4]} where {item[0]}.{item[2]} = NEW.id) as tmp;"
+                f"{item[6]}:= json_agg(tmp.{item[5]})::jsonb from "
+                f"(select name from {item[0]} left join {item[3]} ag on "
+                f"{item[0]}.{item[1]} = ag.{item[4]} where "
+                f"{item[0]}.{item[2]} = NEW.id) as tmp;"
             )
             m2m_values.append(f"'{item[6]}',{item[6]}")
 
@@ -195,15 +181,19 @@ class ActionContentType(TimeStampedModel):
                 BEGIN
                     IF tg_op = 'DELETE' THEN
                         json_new:= json_build_object({delete_build_json_str});
-                        INSERT INTO {EventJournal._meta.db_table}(reason, object_id, content_type, data, created, modified)
-                            VALUES (tg_op ,OLD.{pk}, '{self.content_type}', json_new, now(), now());
+                        INSERT INTO {EventJournal._meta.db_table}
+                            (reason, object_id, content_type, data, created, modified)
+                            VALUES (tg_op ,OLD.{pk}, '{self.content_type}',
+                                    json_new, now(), now());
                     ELSE
                         {m2m_calc}
                         json_new:= json_build_object({build_json_str});
-                        INSERT INTO {EventJournal._meta.db_table}(reason, object_id, content_type, data, created, modified)
-                            VALUES (tg_op ,NEW.{pk}, '{self.content_type}', json_new, now(), now());
+                        INSERT INTO {EventJournal._meta.db_table}
+                            (reason, object_id, content_type, data, created, modified)
+                            VALUES (tg_op ,NEW.{pk}, '{self.content_type}',
+                                    json_new, now(), now());
                     END IF;
-                        RETURN null; 
+                        RETURN null;
                 END; $BODY$ LANGUAGE plpgsql;"""
 
         with connection.cursor() as cursor:
@@ -212,9 +202,7 @@ class ActionContentType(TimeStampedModel):
     def init_triggers(self):
         prefix = self.trigger_prefix()
 
-        catch_update = DRF_ACTIONS_SETTINGS["content_types"][self.content_type].get(
-            "catch_update"
-        )
+        catch_update = DRF_ACTIONS_SETTINGS["content_types"][self.content_type].get("catch_update")
 
         if catch_update:
             catch_fields = " of " + ",".join(catch_update)

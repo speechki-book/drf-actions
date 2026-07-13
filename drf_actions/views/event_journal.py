@@ -1,9 +1,11 @@
 from rest_framework import viewsets, pagination, filters
+
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework_api_key.permissions import HasAPIKey
+
 from drf_actions.filters.event_journal import EventJournalFilterSet
-from drf_actions.serializers.event_journal import EventJournalSerializer
 from drf_actions.models import EventJournal
+from drf_actions.serializers.event_journal import EventJournalSerializer
 
 
 class StandardPagination(pagination.PageNumberPagination):

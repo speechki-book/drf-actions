@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.db import models
+
 from django_json_widget.widgets import JSONEditorWidget
+
 from drf_actions.models import ActionContentType, EventJournal
 
 

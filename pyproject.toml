@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "drf-actions"
-version = "0.3.0"
+version = "0.4.0"
 description = "Create event log with help triggers and send notify after create event"
 authors = ["Pavel Maltsev <pavel@speechki.org>"]
 readme = "README.md"
@@ -9,20 +9,29 @@ license = "MIT"
 keywords=["django", "restframework", "drf", "events", "log"]
 classifiers = [
     "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Framework :: Django",
+    "Framework :: Django :: 4.2",
+    "Framework :: Django :: 5.2",
 ]
 exclude = ["tests*"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
-Django = ">=3.2.14"
-djangorestframework = ">=3.12.2"
-django-model-utils = ">=4.1.1"
-django-filter = ">=22.1"
+python = "^3.10"
+Django = ">=4.2,<6.0"
+djangorestframework = ">=3.16"
+django-model-utils = ">=5.0.0"
+django-filter = ">=24.3"
+djangorestframework-api-key = ">=3.1.0"
+django-json-widget = ">=2.0.0"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
+pytest = ">=8.0"
+pytest-django = ">=4.8"
+psycopg = {version = ">=3.2", extras = ["binary"]}
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -89,3 +98,7 @@ sections = ["FUTURE", "STDLIB", "BASEFRAMEWORK", "FRAMEWORKEXT", "THIRDPARTY", "
 known_baseframework = ["django"]
 known_frameworkext = ["rest_framework"]
 src_paths = ["drf_actions"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "tests.settings"
+testpaths = ["tests"]
