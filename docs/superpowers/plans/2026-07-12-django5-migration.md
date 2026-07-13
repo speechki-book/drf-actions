@@ -227,6 +227,9 @@ DATABASES = {
 INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.auth",
+    "django.contrib.admin",
+    "django.contrib.sessions",
+    "django.contrib.messages",
     "rest_framework",
     "rest_framework_api_key",
     "django_filters",
@@ -255,7 +258,7 @@ DRF_ACTIONS_SETTINGS = {
 }
 ```
 
-Note: `drf_actions.app_settings` reads `settings.DRF_ACTIONS_SETTINGS` at import time, so the `content_type` choice value used throughout tests is `"author"`.
+Note: `drf_actions.app_settings` reads `settings.DRF_ACTIONS_SETTINGS` at import time, so the `content_type` choice value used throughout tests is `"author"`. `django.contrib.admin` (+ its `sessions`/`messages` dependencies) must be installed because `drf_actions/admin.py` registers on the lazy default `admin.site`, which under Django 5 resolves via `apps.get_app_config("admin")`.
 
 - [ ] **Step 4: Create `tests/urls.py`**
 
