@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "drf-actions"
-version = "0.4.0"
+version = "0.5.0"
 description = "Event journal for Django models powered by native PostgreSQL triggers, with a read-only DRF API"
 authors = [
     "Pavel Maltsev <pavel@speechki.org>",
