@@ -569,9 +569,11 @@ def test_insert_update_delete_events_via_trigger():
     )
     assert update.data == {"name": "Bob"}
 
+    author_id = author.id
     author.delete()
+    # Model.delete() clears instance.pk, so the id must be captured beforehand.
     delete = EventJournal.objects.get(
-        content_type="author", reason="DELETE", object_id=str(author.id)
+        content_type="author", reason="DELETE", object_id=str(author_id)
     )
     assert delete.data == {"name": "Bob"}
 
