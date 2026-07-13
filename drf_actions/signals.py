@@ -1,7 +1,8 @@
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
-from drf_actions.models import ActionContentType
+
 from drf_actions.app_settings import INIT_CONTENT_TYPE
+from drf_actions.models import ActionContentType
 
 
 @receiver(post_delete, sender=ActionContentType)

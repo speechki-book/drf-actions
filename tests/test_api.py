@@ -1,5 +1,6 @@
-import pytest
 from rest_framework.test import APIClient
+
+import pytest
 from rest_framework_api_key.models import APIKey
 
 from drf_actions.models import EventJournal
@@ -27,7 +28,13 @@ def test_events_endpoint_lists_events(api_client):
     assert body["count"] == 1
     assert body["results"][0]["object_id"] == "1"
     assert set(body["results"][0].keys()) == {
-        "id", "reason", "object_id", "content_type", "data", "created", "modified",
+        "id",
+        "reason",
+        "object_id",
+        "content_type",
+        "data",
+        "created",
+        "modified",
     }
 
 

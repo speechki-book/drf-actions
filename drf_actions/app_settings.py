@@ -1,4 +1,5 @@
 from django.conf import settings
+
 from model_utils import Choices
 
 
@@ -27,7 +28,10 @@ else:
                     ("email", "email"),
                     ("photo", "photo"),
                     ("partner", "partner_id"),
-                    ("full_name", "full_name",),
+                    (
+                        "full_name",
+                        "full_name",
+                    ),
                 ),
             }
         },
@@ -38,7 +42,12 @@ else:
 
 
 ACTION_EVENTS = DRF_ACTIONS_SETTINGS.get(
-    "events", Choices("INSERT", "UPDATE", "DELETE",)
+    "events",
+    Choices(
+        "INSERT",
+        "UPDATE",
+        "DELETE",
+    ),
 )
 
 ACTION_CONTENT_TYPES = Choices(*DRF_ACTIONS_SETTINGS["content_types"].keys())

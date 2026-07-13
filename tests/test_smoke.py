@@ -11,7 +11,5 @@ def test_modules_import():
 
 @pytest.mark.django_db
 def test_event_journal_create_and_str():
-    obj = EventJournal.objects.create(
-        reason="INSERT", content_type="author", object_id="1", data={"name": "A"}
-    )
+    obj = EventJournal.objects.create(reason="INSERT", content_type="author", object_id="1", data={"name": "A"})
     assert str(obj) == "author : INSERT : 1"
