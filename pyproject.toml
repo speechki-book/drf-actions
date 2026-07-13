@@ -1,14 +1,22 @@
 [tool.poetry]
 name = "drf-actions"
 version = "0.4.0"
-description = "Create event log with help triggers and send notify after create event"
-authors = ["Pavel Maltsev <pavel@speechki.org>"]
+description = "Event journal for Django models powered by native PostgreSQL triggers, with a read-only DRF API"
+authors = [
+    "Pavel Maltsev <pavel@speechki.org>",
+    "Bulat Kurbanov <kurbanovbul@gmail.com>",
+]
+maintainers = ["Bulat Kurbanov <kurbanovbul@gmail.com>"]
 readme = "README.md"
 homepage = "https://github.com/speechki-book/drf-actions"
+repository = "https://github.com/speechki-book/drf-actions"
 license = "MIT"
-keywords=["django", "restframework", "drf", "events", "log"]
+keywords = ["django", "restframework", "drf", "events", "log", "audit", "triggers", "postgresql"]
 classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -16,8 +24,14 @@ classifiers = [
     "Framework :: Django",
     "Framework :: Django :: 4.2",
     "Framework :: Django :: 5.2",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 exclude = ["tests*"]
+
+[tool.poetry.urls]
+"Issue Tracker" = "https://github.com/speechki-book/drf-actions/issues"
+"Changelog" = "https://github.com/speechki-book/drf-actions/releases"
 
 [tool.poetry.dependencies]
 python = "^3.10"
